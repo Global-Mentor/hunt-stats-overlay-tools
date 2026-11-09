@@ -1,4 +1,4 @@
-﻿param([string]$PackagePath)
+﻿param([string]$PackagePath,[string]$ExpectedVersion)
 $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'Fixtures.ps1')
@@ -25,6 +25,10 @@ try {
 $out=Join-Path $fixture 'unpacked'
 Expand-Archive -LiteralPath $zip -DestinationPath $out
 $app=Join-Path $out 'hunt-stats-overlay-tools'
+if ($ExpectedVersion) {
+    $versionInfo=[Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $app 'app/HuntStatsOverlayTools.exe'))
+    if ($versionInfo.ProductVersion.Split('+')[0] -ne $ExpectedVersion) { throw 'Packaged application version does not match release' }
+}
 foreach ($asset in @('source/images/kill/skull.png','source/images/death/skull.png','source/images/trade/skull.png','source/sounds/kill/kill.mp3','source/sounds/death/death.wav','source/sounds/trade/trade.wav')) {
     if ((Get-FileHash (Join-Path $root $asset)).Hash -ne (Get-FileHash (Join-Path $app $asset)).Hash) { throw "Changed bundled media: $asset" }
 }

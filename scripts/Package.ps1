@@ -1,4 +1,7 @@
-﻿param([string]$OutputDirectory = (Join-Path (Split-Path -Parent $PSScriptRoot) 'dist'))
+﻿param(
+    [string]$OutputDirectory = (Join-Path (Split-Path -Parent $PSScriptRoot) 'dist'),
+    [ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version
+)
 $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 $outputRoot=[IO.Path]::GetFullPath($OutputDirectory)
@@ -7,7 +10,9 @@ $staging=Join-Path $outputRoot ('.build-'+[guid]::NewGuid().ToString('N'))
 $build=Join-Path $staging 'hunt-stats-overlay-tools'
 [void][IO.Directory]::CreateDirectory($build)
 try {
-    & dotnet publish (Join-Path $root 'src/desktop/HuntStatsOverlayTools.csproj') -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o (Join-Path $build 'app') -p:RestoreLockedMode=true --nologo | Out-Host
+    [string[]]$versionArguments = @()
+    if ($Version) { $versionArguments += "-p:Version=$Version" }
+    & dotnet publish (Join-Path $root 'src/desktop/HuntStatsOverlayTools.csproj') -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o (Join-Path $build 'app') -p:RestoreLockedMode=true @versionArguments --nologo | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'Publish failed' }
     foreach ($name in @('Start.bat','Stop.bat','Overlay.html','Statistics.html','client.js','statistics.js','statistics.css','config.example.json','README.md','THIRD-PARTY-NOTICES.txt')) {
         Copy-Item -LiteralPath (Join-Path $root $name) -Destination $build

@@ -1,4 +1,4 @@
-name: Tests
+name: Tests and release
 on:
   push:
   pull_request:
@@ -15,3 +15,66 @@ jobs:
       - name: Check application and portable package
         shell: powershell
         run: ./scripts/Test.ps1 -IncludePackage
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: windows
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release-main
+      cancel-in-progress: false
+      queue: max
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Set release version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content src/desktop/HuntStatsOverlayTools.csproj
+          $base = [version]$project.Project.PropertyGroup.Version
+          $version = "$($base.Major).$($base.Minor).$env:GITHUB_RUN_NUMBER"
+          "RELEASE_VERSION=$version" >> $env:GITHUB_ENV
+      - name: Build and verify release archive
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:HUNT_TEST_ROOT = Join-Path $env:RUNNER_TEMP 'release-package-tests'
+          ./scripts/Package.ps1 -Version $env:RELEASE_VERSION
+          ./tests/Package.ps1 -PackagePath dist/HuntStatsOverlayTools.zip -ExpectedVersion $env:RELEASE_VERSION
+          $hash = (Get-FileHash dist/HuntStatsOverlayTools.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  HuntStatsOverlayTools.zip" | Set-Content dist/SHA256SUMS.txt -Encoding ascii
+      - name: Publish verified release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Invoke-Gh {
+            & gh @args
+            if ($LASTEXITCODE -ne 0) { throw 'GitHub command failed' }
+          }
+          $tag = "v$env:RELEASE_VERSION"
+          $releases = Invoke-Gh release list --repo $env:GITHUB_REPOSITORY --limit 1000 --json tagName,isDraft | ConvertFrom-Json
+          $existing = $releases | Where-Object tagName -eq $tag
+          if ($existing) {
+            $release = Invoke-Gh release view $tag --repo $env:GITHUB_REPOSITORY --json targetCommitish,isDraft | ConvertFrom-Json
+            if ($release.targetCommitish -ne $env:GITHUB_SHA) { throw 'Release belongs to another commit' }
+            if (-not $release.isDraft) {
+              Write-Output "Release $tag is already published."
+              exit 0
+            }
+          }
+          $newer = $releases | Where-Object {
+            -not $_.isDraft -and $_.tagName -match '^v\d+\.\d+\.\d+$' -and
+            [version]$_.tagName.Substring(1) -gt [version]$env:RELEASE_VERSION
+          }
+          $latest = if ($newer) { '--latest=false' } else { '--latest' }
+          if ($existing) {
+            Invoke-Gh release upload $tag dist/HuntStatsOverlayTools.zip dist/SHA256SUMS.txt --clobber --repo $env:GITHUB_REPOSITORY
+            Invoke-Gh release edit $tag --draft=false $latest --repo $env:GITHUB_REPOSITORY
+          } else {
+            Invoke-Gh release create $tag dist/HuntStatsOverlayTools.zip dist/SHA256SUMS.txt --target $env:GITHUB_SHA --title "Hunt Stats & Overlay Tools $env:RELEASE_VERSION" --generate-notes $latest --repo $env:GITHUB_REPOSITORY
+          }

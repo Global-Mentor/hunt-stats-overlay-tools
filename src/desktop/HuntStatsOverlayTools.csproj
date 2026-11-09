@@ -5,7 +5,7 @@
     <AssemblyName>HuntStatsOverlayTools</AssemblyName>
     <Product>Hunt Stats &amp; Overlay Tools</Product>
     <Title>Hunt Stats &amp; Overlay Tools</Title>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <RootNamespace>HuntStatsOverlayTools.Desktop</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>assets/app-icon.ico</ApplicationIcon>
