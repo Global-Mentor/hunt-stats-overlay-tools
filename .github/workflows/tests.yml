@@ -57,10 +57,10 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'GitHub command failed' }
           }
           $tag = "v$env:RELEASE_VERSION"
-          $releases = Invoke-Gh release list --repo $env:GITHUB_REPOSITORY --limit 1000 --json tagName,isDraft | ConvertFrom-Json
+          $releases = Invoke-Gh release list --repo $env:GITHUB_REPOSITORY --limit 1000 --json 'tagName,isDraft' | ConvertFrom-Json
           $existing = $releases | Where-Object tagName -eq $tag
           if ($existing) {
-            $release = Invoke-Gh release view $tag --repo $env:GITHUB_REPOSITORY --json targetCommitish,isDraft | ConvertFrom-Json
+            $release = Invoke-Gh release view $tag --repo $env:GITHUB_REPOSITORY --json 'targetCommitish,isDraft' | ConvertFrom-Json
             if ($release.targetCommitish -ne $env:GITHUB_SHA) { throw 'Release belongs to another commit' }
             if (-not $release.isDraft) {
               Write-Output "Release $tag is already published."
