@@ -3,7 +3,7 @@ $source=Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'Fixtures.ps1')
 $fixture=New-TestDirectory 'restore'
 foreach ($name in @('source','config.example.json')) { Copy-Item -LiteralPath (Join-Path $source $name) -Destination $fixture -Recurse }
-$binaries=if ($env:HUNT_BUILD_DIR) { $env:HUNT_BUILD_DIR } else { Join-Path $source 'src/hunt-tracker-desktop/bin/Release/net10.0-windows' }
+$binaries=if ($env:HUNT_BUILD_DIR) { $env:HUNT_BUILD_DIR } else { Join-Path $source 'src/desktop/bin/Release/net10.0-windows' }
 Copy-Item -LiteralPath $binaries -Destination (Join-Path $fixture 'app') -Recurse
 @{gameFolder='./game';nvidiaLogs='./sdk';volume=0.5;durationMs=1800} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $fixture 'config.json') -Encoding UTF8
 Add-Type -TypeDefinition @'
@@ -19,7 +19,7 @@ public static class RestoreTest {
 }
 '@
 $info=[Diagnostics.ProcessStartInfo]::new()
-$info.FileName=Join-Path $fixture 'app/HuntTracker.exe'
+$info.FileName=Join-Path $fixture 'app/HuntStatsOverlayTools.exe'
 $info.UseShellExecute=$false
 $info.CreateNoWindow=$true
 $info.WindowStyle='Hidden'
@@ -32,7 +32,7 @@ try {
         [Threading.Thread]::Sleep(50)
         if ($process.HasExited) { throw 'Tracker exited during test startup' }
         $process.Refresh()
-        $window=if ($process.MainWindowTitle -eq 'Hunt Tracker (by Global Mentor)') { $process.MainWindowHandle } else { [IntPtr]::Zero }
+        $window=if ($process.MainWindowTitle -eq 'Hunt Stats & Overlay Tools (by Global Mentor)') { $process.MainWindowHandle } else { [IntPtr]::Zero }
     } while (($window -eq [IntPtr]::Zero -or -not [IO.File]::Exists($stateFile)) -and [DateTime]::UtcNow -lt $deadline)
     if ($window -eq [IntPtr]::Zero) { throw 'Test window not found' }
     [Threading.Thread]::Sleep(500)

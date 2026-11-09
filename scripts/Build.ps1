@@ -4,10 +4,10 @@ $output=[IO.Path]::GetFullPath((Join-Path $root '.local/build'))
 $staging=[IO.Path]::GetFullPath((Join-Path $root ('.local/publish-'+[guid]::NewGuid().ToString('N'))))
 [void][IO.Directory]::CreateDirectory($output)
 try {
-    & dotnet publish (Join-Path $root 'src/hunt-tracker-desktop/HuntTracker.csproj') -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o $staging -p:RestoreLockedMode=true --nologo
+    & dotnet publish (Join-Path $root 'src/desktop/HuntStatsOverlayTools.csproj') -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o $staging -p:RestoreLockedMode=true --nologo
     if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
-    $source=Join-Path $staging 'HuntTracker.exe'
-    $destination=Join-Path $output 'HuntTracker.exe'
+    $source=Join-Path $staging 'HuntStatsOverlayTools.exe'
+    $destination=Join-Path $output 'HuntStatsOverlayTools.exe'
     for ($attempt=0; ; $attempt++) {
         try {
             if (Test-Path -LiteralPath $destination) { [IO.File]::Replace($source,$destination,[System.Management.Automation.Language.NullString]::Value) }
@@ -18,7 +18,7 @@ try {
             [Threading.Thread]::Sleep(100)
         }
     }
-    foreach ($name in @('CommunityToolkit.Mvvm.dll','HuntTracker.Core.dll','HuntTracker.Core.pdb','HuntTracker.deps.json','HuntTracker.dll','HuntTracker.pdb','HuntTracker.runtimeconfig.json')) {
+    foreach ($name in @('CommunityToolkit.Mvvm.dll','HuntStatsOverlayTools.Core.dll','HuntStatsOverlayTools.Core.pdb','HuntStatsOverlayTools.deps.json','HuntStatsOverlayTools.dll','HuntStatsOverlayTools.pdb','HuntStatsOverlayTools.runtimeconfig.json')) {
         $file=Join-Path $output $name
         if (Test-Path -LiteralPath $file) { Remove-Item -LiteralPath $file -Force }
     }

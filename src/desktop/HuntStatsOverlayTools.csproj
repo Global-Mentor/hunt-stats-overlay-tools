@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>HuntStatsOverlayTools</AssemblyName>
+    <Product>Hunt Stats &amp; Overlay Tools</Product>
+    <Title>Hunt Stats &amp; Overlay Tools</Title>
+    <Version>0.3.0</Version>
+    <RootNamespace>HuntStatsOverlayTools.Desktop</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>assets/app-icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="assets/app-icon.ico" />
+    <Resource Include="assets/game-ui/*.png" />
+    <ProjectReference Include="../core/HuntStatsOverlayTools.Core.csproj" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+</Project>

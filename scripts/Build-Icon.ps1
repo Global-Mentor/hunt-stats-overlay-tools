@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
-$assets=Join-Path $root 'src/hunt-tracker-desktop/assets'
+$assets=Join-Path $root 'src/desktop/assets'
 Add-Type -AssemblyName PresentationCore,WindowsBase
 [xml]$svg=Get-Content -LiteralPath (Join-Path $assets 'app-icon.svg') -Raw
 $frames=@()

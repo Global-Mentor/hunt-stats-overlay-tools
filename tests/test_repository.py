@@ -18,24 +18,24 @@ def ignored(path):
 
 
 required = [
-    'config.example.json', 'HuntTracker.slnx', 'Directory.Build.props',
-    'src/hunt-tracker-core/packages.lock.json',
-    'src/hunt-tracker-desktop/packages.win-x64.lock.json',
+    'config.example.json', 'HuntStatsOverlayTools.slnx', 'Directory.Build.props',
+    'src/core/packages.lock.json',
+    'src/desktop/packages.win-x64.lock.json',
     'source/images/kill/skull.png', 'source/images/death/skull.png',
     'source/images/trade/skull.png', 'source/sounds/kill/kill.mp3',
     'source/sounds/death/death.wav', 'source/sounds/trade/trade.wav',
-    'src/hunt-tracker-desktop/assets/app-icon.ico',
-    'src/hunt-tracker-desktop/assets/game-ui/panel.png',
+    'src/desktop/assets/app-icon.ico',
+    'src/desktop/assets/game-ui/panel.png',
 ]
 private = [
     'config.json', 'data/statistics.json', 'data/sessions/session.json',
     'logs/events.jsonl', '_runtime/state.json', '.local/preview.png',
-    'dist/HuntTracker.zip', 'personal-backup.zip', 'personal-backup.7z',
+    'dist/HuntStatsOverlayTools.zip', 'personal-backup.zip', 'personal-backup.7z',
     'AGENTS.md', '.codex/settings.json', '.agents/notes.md',
     'source/sounds/kill/custom.mp3', 'source/images/death/custom.png',
     'source/images/trade/alternate.png', 'source/sounds/trade/custom.wav',
-    'src/hunt-tracker-desktop/bin/HuntTracker.exe',
-    'src/hunt-tracker-desktop/obj/cache.json', 'Game.log', 'events.jsonl',
+    'src/desktop/bin/HuntStatsOverlayTools.exe',
+    'src/desktop/obj/cache.json', 'Game.log', 'events.jsonl',
 ]
 for path in required:
     assert (ROOT / path).is_file(), f'Missing source asset: {path}'

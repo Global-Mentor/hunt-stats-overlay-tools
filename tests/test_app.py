@@ -28,7 +28,7 @@ def run():
     app = folder / "app"
     app.mkdir()
     shutil.copytree(SOURCE / 'source', app / 'source')
-    binaries = Path(os.environ.get('HUNT_BUILD_DIR', SOURCE / 'src/hunt-tracker-desktop/bin/Release/net10.0-windows'))
+    binaries = Path(os.environ.get('HUNT_BUILD_DIR', SOURCE / 'src/desktop/bin/Release/net10.0-windows'))
     shutil.copytree(binaries, app / 'app')
     shutil.copyfile(SOURCE / 'config.example.json', app / 'config.json')
     (app / 'source' / 'sounds' / 'kill' / 'fixture.mp3').write_bytes(b'fixture audio')
@@ -84,7 +84,7 @@ def run():
         fixture = subprocess.Popen([str(fixture_exe)])
         sdk_log = sdk_folder / ("HuntGame_" + str(fixture.pid) + ".log")
         sdkline(sdk_log, "old")
-        tracker = subprocess.Popen([str(app / 'app' / 'HuntTracker.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
+        tracker = subprocess.Popen([str(app / 'app' / 'HuntStatsOverlayTools.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
         first = wait(lambda: state(), "tracker ready")
         wait(lambda: state()["sdk_readable"], "logs attached")
         assert 'recent' not in first['statistics'], 'overlay payload includes full session history'
@@ -200,7 +200,7 @@ def run():
         wait(lambda: state()['game_readable'], 'large rewritten game log')
         time.sleep(2)
         assert state()['statistics']['games'] == before_games, 'replayed match after first read batch'
-        duplicate = subprocess.Popen([str(app / 'app' / 'HuntTracker.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
+        duplicate = subprocess.Popen([str(app / 'app' / 'HuntStatsOverlayTools.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
         duplicate.wait(timeout=3)
         assert state()["session"] == first["session"], "duplicate start replaced process"
         post("/api/stop", first["session"])
@@ -220,7 +220,7 @@ def run():
         assert (saved['kills'], saved['deaths']) == (5, 3), saved
         assert 'alerts' not in state()['display'] and 'stats' not in state()['display']
         last_state = None
-        tracker = subprocess.Popen([str(app / 'app' / 'HuntTracker.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
+        tracker = subprocess.Popen([str(app / 'app' / 'HuntStatsOverlayTools.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
         restarted = wait(lambda: state() and state()['running'] and state()['session'] != first['session'] and state(), 'restart with saved statistics')
         assert restarted['statistics']['id'] == saved['id']
         assert (restarted['kills'], restarted['deaths']) == (5, 3)
@@ -231,7 +231,7 @@ def run():
             config['alertMode'] = mode
             config['detectTrades'] = mode == 'trades'
             (app / 'config.json').write_text(json.dumps(config), encoding='utf-8')
-            tracker = subprocess.Popen([str(app / 'app' / 'HuntTracker.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
+            tracker = subprocess.Popen([str(app / 'app' / 'HuntStatsOverlayTools.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
             wait(lambda: state()['running'] and state()['session'] != old_session and state()['sdk_readable'], 'mode restart')
             append(game_log, "Starting UI state machine 'loading/StateMachine'")
             wait(lambda: (state()['statistics']['current'] or {}).get('status') == 'loading', 'fresh match history')
@@ -286,7 +286,7 @@ def run():
             old_session = state()['session']
             config.update(alertMode=alert_mode, detectTrades=detect)
             (app / 'config.json').write_text(json.dumps(config), encoding='utf-8')
-            tracker = subprocess.Popen([str(app / 'app' / 'HuntTracker.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
+            tracker = subprocess.Popen([str(app / 'app' / 'HuntStatsOverlayTools.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
             wait(lambda: state()['running'] and state()['session'] != old_session and state()['sdk_readable'], 'independent modes startup')
             append(game_log, "Starting UI state machine 'loading/StateMachine'")
             wait(lambda: state()['statistics']['current']['status'] == 'loading', 'independent modes match')
@@ -309,7 +309,7 @@ def run():
         old_session = state()['session']
         config.update(alertsEnabled=False, statisticsEnabled=False, autoRefreshMedia=False, detectTrades=False, alertMode='kills', statisticsRefreshMs=5000)
         (app / 'config.json').write_text(json.dumps(config), encoding='utf-8')
-        tracker = subprocess.Popen([str(app / 'app' / 'HuntTracker.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
+        tracker = subprocess.Popen([str(app / 'app' / 'HuntStatsOverlayTools.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
         wait(lambda: state()['running'] and state()['session'] != old_session and state()['sdk_readable'], 'disabled modules startup')
         initial_kills = state()['kills']
         assert not state()['media']['kill']['images'], 'disabled alert module scanned media'
@@ -370,7 +370,7 @@ def run():
         assert recovery['kills'] == counters[0] + 3, 'shutdown lost unsaved counters'
         stats_path.rmdir(); saved_path.rename(stats_path)
         old_session = state()['session']
-        tracker = subprocess.Popen([str(app / 'app' / 'HuntTracker.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
+        tracker = subprocess.Popen([str(app / 'app' / 'HuntStatsOverlayTools.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
         wait(lambda: state()['running'] and state()['session'] != old_session, 'recovery restart')
         assert state()['kills'] == counters[0] + 3, 'restart ignored newest recovery'
         wait(lambda: not recovery_path.exists(), 'recovery committed')
@@ -381,7 +381,7 @@ def run():
         (app / 'config.json').write_text(json.dumps(config), encoding='utf-8')
         image_folder = app / 'source' / 'images' / 'kill'
         shutil.rmtree(image_folder); image_folder.write_text('blocked', encoding='utf-8')
-        tracker = subprocess.Popen([str(app / 'app' / 'HuntTracker.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
+        tracker = subprocess.Popen([str(app / 'app' / 'HuntStatsOverlayTools.exe'), '--root', str(app), '--headless', '--game-process', 'HuntCombatFixture'])
         wait(lambda: state()['running'] and state()['session'] != old_session and state()['sdk_readable'], 'startup without game log')
         games_before = state()['statistics']['games']
         append(game_log, "Starting UI state machine 'loading/StateMachine'")

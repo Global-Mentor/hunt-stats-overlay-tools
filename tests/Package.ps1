@@ -16,15 +16,15 @@ try {
     }
     $forbidden=@($entries | Where-Object { $_ -match '(^|/)(config.json|data|logs|_runtime|AGENTS.md|\.local|\.git|tests)(/|$)' })
     if ($forbidden.Count) { throw 'Private or development files in package' }
-    if ('hunt-tracker/app/HuntTracker.exe' -notin $entries -or @($entries | Where-Object { $_ -match '\.(ps1|pdb)$' }).Count) { throw 'Invalid native package contents' }
-    if (@($entries | Where-Object { $_ -match '^hunt-tracker/(Image|Images|Sounds)/' }).Count) { throw 'Media outside source in package' }
+    if ('hunt-stats-overlay-tools/app/HuntStatsOverlayTools.exe' -notin $entries -or @($entries | Where-Object { $_ -match '\.(ps1|pdb)$' }).Count) { throw 'Invalid native package contents' }
+    if (@($entries | Where-Object { $_ -match '^hunt-stats-overlay-tools/(Image|Images|Sounds)/' }).Count) { throw 'Media outside source in package' }
     foreach ($asset in @('source/images/kill/skull.png','source/images/death/skull.png','source/images/trade/skull.png','source/sounds/kill/kill.mp3','source/sounds/death/death.wav','source/sounds/trade/trade.wav')) {
-        if (('hunt-tracker/'+$asset) -notin $entries) { throw "Missing bundled media: $asset" }
+        if (('hunt-stats-overlay-tools/'+$asset) -notin $entries) { throw "Missing bundled media: $asset" }
     }
 } finally { $archive.Dispose() }
 $out=Join-Path $fixture 'unpacked'
 Expand-Archive -LiteralPath $zip -DestinationPath $out
-$app=Join-Path $out 'hunt-tracker'
+$app=Join-Path $out 'hunt-stats-overlay-tools'
 foreach ($asset in @('source/images/kill/skull.png','source/images/death/skull.png','source/images/trade/skull.png','source/sounds/kill/kill.mp3','source/sounds/death/death.wav','source/sounds/trade/trade.wav')) {
     if ((Get-FileHash (Join-Path $root $asset)).Hash -ne (Get-FileHash (Join-Path $app $asset)).Hash) { throw "Changed bundled media: $asset" }
 }
@@ -33,7 +33,7 @@ if ($defaults.volume -ne 0.5 -or $defaults.durationMs -ne 1800) { throw 'Standal
 $defaults.gameFolder='./game'; $defaults.nvidiaLogs='./sdk'
 $defaults | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $app 'config.example.json') -Encoding utf8
 $info=[Diagnostics.ProcessStartInfo]::new()
-$info.FileName=Join-Path $app 'app/HuntTracker.exe'
+$info.FileName=Join-Path $app 'app/HuntStatsOverlayTools.exe'
 $info.UseShellExecute=$false; $info.CreateNoWindow=$true; $info.WindowStyle='Hidden'
 $info.Arguments='--game-process NoSuchPackageFixture'
 $bundle=Join-Path $fixture 'bundled-runtime'

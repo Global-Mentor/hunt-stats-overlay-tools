@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/core/">
+    <Project Path="src/core/HuntStatsOverlayTools.Core.csproj" />
+  </Folder>
+  <Folder Name="/src/desktop/">
+    <Project Path="src/desktop/HuntStatsOverlayTools.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/desktop/">
+    <Project Path="tests/desktop/HuntStatsOverlayTools.DesktopTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/core/">
+    <Project Path="tests/core/HuntStatsOverlayTools.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -2,9 +2,9 @@
 $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 $temporaryRoot=[IO.Path]::GetFullPath([IO.Path]::GetTempPath())
-$fixture=Join-Path $temporaryRoot ('HuntTrackerMeasure-'+[guid]::NewGuid().ToString('N'))
+$fixture=Join-Path $temporaryRoot ('HuntStatsOverlayToolsMeasure-'+[guid]::NewGuid().ToString('N'))
 [void][IO.Directory]::CreateDirectory($fixture)
-if (-not $BuildDirectory) { $BuildDirectory=Join-Path $root 'src/hunt-tracker-desktop/bin/Release/net10.0-windows' }
+if (-not $BuildDirectory) { $BuildDirectory=Join-Path $root 'src/desktop/bin/Release/net10.0-windows' }
 Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
@@ -48,7 +48,7 @@ try {
         }
         $processName=if ($scenario -eq 'waiting') { 'NoSuchHuntMeasure' } else { $gameName }
         $info=[Diagnostics.ProcessStartInfo]::new()
-        $info.FileName=Join-Path $BuildDirectory 'HuntTracker.exe'
+        $info.FileName=Join-Path $BuildDirectory 'HuntStatsOverlayTools.exe'
         $info.UseShellExecute=$false; $info.CreateNoWindow=$true; $info.WindowStyle='Hidden'
         $info.Arguments='--root "'+$app+'" --game-process '+$processName
         $process=[Diagnostics.Process]::Start($info)

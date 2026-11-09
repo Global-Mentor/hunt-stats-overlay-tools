@@ -3,7 +3,7 @@ Copyright Crytek.
 The game-ui textures originate from the game client and are not covered by the licenses below.
 Original asset paths are recorded in assets/game-ui/sources.json in the desktop source project.
 
-Hunt Tracker uses CommunityToolkit.Mvvm 8.4.2.
+Hunt Stats & Overlay Tools uses CommunityToolkit.Mvvm 8.4.2.
 https://github.com/CommunityToolkit/dotnet
 
 # .NET Community Toolkit
